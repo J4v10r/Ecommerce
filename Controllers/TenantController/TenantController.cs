@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI.Common;
@@ -12,6 +13,7 @@ namespace Saas.Controllers.TenantController
 {
     
     [Route("api/[controller]")]
+    [EnableCors("AllowAngularDev")]
     [ApiController]
     public class TenantController : ControllerBase
     {

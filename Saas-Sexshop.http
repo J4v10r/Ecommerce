@@ -1,0 +1,6 @@
+@Saas_Sexshop_HostAddress = http://localhost:5170
+
+GET {{Saas_Sexshop_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

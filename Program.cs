@@ -32,7 +32,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDev",
         builder => builder
-            .WithOrigins("https://localhost:4200")
+            .WithOrigins("http://localhost:4200","https://localhost:4200")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()); 
@@ -132,20 +132,15 @@ builder.Logging.AddDebug();
 var app = builder.Build();
 
 app.UseCors("AllowAngularDev");
-
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors("AllowAngularDev");
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 

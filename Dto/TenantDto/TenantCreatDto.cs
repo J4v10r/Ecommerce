@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Saas.Services.DTOs.TenantDto
+namespace Saas_Sexshop.Dto.TenantDto
 {
     public class TenantCreatDto
     {
@@ -27,5 +27,7 @@ namespace Saas.Services.DTOs.TenantDto
         [MaxLength(11), MinLength(11)]
         [RegularExpression(@"^\d{11}$")]
         public string TenantCpf { get; set; }
+
+        public int PlanId { get; set; }
     }
 }
