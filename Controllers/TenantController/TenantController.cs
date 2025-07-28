@@ -45,7 +45,23 @@ namespace Saas.Controllers.TenantController
                 }
 
                 _logger.LogInformation("Vendedor criado com sucesso.");
-                return Ok(new { success = true, message = "Vendedor criado com sucesso" });
+
+                var tenant = await _tenantService.GetTenantByEmailAsync(tenantCreatDto.TenantEmail);
+                if (tenant == null)
+                {
+                    return StatusCode(500, new { success = false, message = "Erro ao buscar tenant após criação." });
+                }
+
+                var token = _tenantAuthService.GenerateToken(tenant);
+                var response = new TenantAuthResponseDto
+                {
+                    Token = token,
+                    TenantId = tenant.TenantId,
+                    TenantName = tenant.TenantName,
+                    Email = tenant.TenantEmail
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
