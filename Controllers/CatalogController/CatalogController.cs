@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Saas.Services.CatalogService;
 using Saas.Services.DTOs.CatalogDto;
+using  System.IdentityModel.Tokens.Jwt;
 
 namespace Saas.Controllers.CatalogController
 {
@@ -21,7 +23,7 @@ namespace Saas.Controllers.CatalogController
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<CatalogResponseDto>> Post([FromBody] CatalogCreateDto catalogCreateDto)
+        public async Task<ActionResult> Post([FromBody] CatalogCreateDto catalogCreateDto)
         {
             if (!ModelState.IsValid)
             {
@@ -30,8 +32,22 @@ namespace Saas.Controllers.CatalogController
 
             try
             {
-                var catalog = await _catalogService.AddCatalogAsync(catalogCreateDto);
-                return CreatedAtAction(nameof(GetById), new { id = catalog.CatalogId }, catalog);
+                var tenantIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.Sub);
+                if (tenantIdClaim == null)
+                {
+                    _logger.LogWarning("Id do usuario não identificado.");
+                    return Unauthorized("Identificação do usuário não encontrada.");
+                    
+                }
+
+                int tenantId = int.Parse(tenantIdClaim.Value);
+
+                
+                var catalog = await _catalogService.AddCatalogAsync(catalogCreateDto, tenantId);
+
+                return StatusCode(StatusCodes.Status201Created);
+
+
             }
             catch (Exception ex)
             {
@@ -89,16 +105,12 @@ namespace Saas.Controllers.CatalogController
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<CatalogResponseDto>>> GetByTenantId(int tenantId)
+        public async Task<ActionResult<CatalogResponseDto>> GetByTenantId(int tenantId)
         {
             try
             {
-                var catalogs = await _catalogService.GetCatalogsByTenantIdAsync(tenantId);
-                if (catalogs == null || !catalogs.Any())
-                {
-                    return NoContent();
-                }
-                return Ok(catalogs);
+                var catalogs = await _catalogService.GetCatalogByTenantIdAsync(tenantId);
+               return Ok(catalogs);
             }
             catch (Exception ex)
             {
@@ -128,5 +140,6 @@ namespace Saas.Controllers.CatalogController
                 return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao deletar o catálogo.");
             }
         }
+
     }
 }
